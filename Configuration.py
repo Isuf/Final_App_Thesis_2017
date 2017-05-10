@@ -42,7 +42,7 @@ class Parameters:
                        },
 
                      "ngrams_bow" : {
-                                     "min_ngrams": 3,
+                                     "min_ngrams": 2,
                                      "max_ngrams": 3,
                                      "feature_level": "char",   #'char' for character;  'word' for word
                                      "method": "ngrams" ,    # "bow" for Bag-of-Words;  "ngrams" for n(1,2,...) grams  #lsa 

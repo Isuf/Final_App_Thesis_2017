@@ -19,14 +19,16 @@ file_locations=params.file_locations
 param = params.param
 
 clean_string = True
-remove_stop_words=True
-testMode=True 
+remove_stop_words=False
+remove_numberolny_words=False
+testMode=False 
 
 import glob
-data_folder=glob.glob("D:\\Tema NTNU\\Data\\Delivery\\Opinosis\\topics\\*.data")
 
-testing_data_folder=["Results\\security_data.txt"]#params.baseline_locations["Nulled_Test"] #
-data_folder=params.baseline_locations["Nulled_MC"]
+
+testing_data_folder=params.baseline_locations["Nulled_Binary"]#["results\char_trigram_binary\Security_data.txt"]#params.baseline_locations["Binary_All"] #
+data_folder=params.baseline_locations["Nulled_Binary"]
+#data_folder=glob.glob("D:\\Tema NTNU\\Data\\Delivery\\Opinosis\\topics\\*.data")
 
 if(classification_method=="distribuional"):
     '''
@@ -40,10 +42,15 @@ if(classification_method=="distribuional"):
         test_docs, vocab,original_docs=Utils.load(testing_data_folder,clean_string=clean_string,remove_stop_words=remove_stop_words,split_for_cv=True)
         max_l= Utils.get_dataset_details(test_docs,vocab)
         test_docs = [ sent["text"] for sent in test_docs]
-        Distributional_Representation.label_new_data(test_docs,original_docs)
+        path_to_model="Saved_Shallow_Models\char_ngrams(3,3)_trainedon_binary.pkl"
+        Distributional_Representation.label_new_data(test_docs,original_docs,model=path_to_model)
 
     else:
-        docs, vocab,_ = Utils.load(data_folder,clean_string=clean_string,remove_stop_words=remove_stop_words,split_for_cv=True)
+        docs, vocab,_ = Utils.load(data_folder,
+                                   clean_string=clean_string,
+                                   remove_stop_words=remove_stop_words,
+                                   remove_numbers=remove_numberolny_words,split_for_cv=True)
+
         max_l= Utils.get_dataset_details(docs,vocab)
         labels = [sent["y"] for sent in docs]
         data = [ sent["text"] for sent in docs]

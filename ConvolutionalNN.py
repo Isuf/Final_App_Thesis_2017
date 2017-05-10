@@ -335,7 +335,8 @@ def create_dataset(data_folder,vector_source,vector_size,cleanstr=True, remove_s
      number_classes = len(data_folder)
      print("number of classes " + str(number_classes))
      print("loading data...", end=' ')        
-     docs, vocab = Utils.load(data_folder,clean_string=cleanstr,remove_stop_words=remove_stopwords,split_for_cv=True)
+     docs, vocab,_ = Utils.load(data_folder,clean_string=cleanstr,remove_stop_words=remove_stopwords,split_for_cv=True)
+     #docs, vocab,_ = Utils.load_data_LDA(data_folder,clean_string=cleanstr,split_for_cv=True)
      max_l =Utils.get_dataset_details(docs,vocab)
 
      #the format of pretrained vectors
@@ -364,7 +365,7 @@ if __name__=="__main__":
     
     #Select the data 
     data_folder=params.baseline_locations["Nulled_Binary"]
-
+    #data_folder=params.baseline_locations["Nulled_Test"]
     #import glob
     #data_folder=glob.glob("D:\\Tema NTNU\\Data\\Delivery\\Opinosis\\topics\\*.data")
 
@@ -406,11 +407,11 @@ if __name__=="__main__":
         perf,data_testing, labels_test_predicted,labels_testing = train_conv_net(vector_source,i,datasets,
                                   U, img_w=vec_size,
                                   lr_decay=0.95,
-                                  filter_hs=[3,4],#[3,4,5],
+                                  filter_hs=[3,4,5],#[3,4,5],
                                   conv_non_linear="relu",
                                   hidden_units=[100,num_class], 
                                   shuffle_batch=True, 
-                                  n_epochs=100, 
+                                  n_epochs=25, 
                                   sqr_norm_lim=9,
                                   non_static=non_static,
                                   batch_size=1000,

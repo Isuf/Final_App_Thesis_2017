@@ -23,14 +23,14 @@ import logging
 import joblib
 
 
-def label_new_data(unlabeled_docs,original_docs):
+def label_new_data(unlabeled_docs,original_docs,model):
       '''
         This method is supposed to used in production
         It requires that the model is trained and saved in a file locally. 
         It loads the model, predicts the labeles of unLabeled data, and stores the results
     '''
       # load the saved pipeline that includes both the vectorizer and the classifier and predict
-      classifier = joblib.load('Saved_Shallow_Models\Model_ngrams_char_3_3.pkl')
+      classifier = joblib.load(model) #'Saved_Shallow_Models\Model_ngrams_char_3_3.pkl')
       print("Classifier loaded . Predicting new samples ...")
       predicted_labels = classifier.predict(unlabeled_docs)
       res=[]
@@ -245,11 +245,9 @@ def run_document_classification(data, labels, parameters, show_progress=True):
     if feature_construction_method =="bow":   # Bag-of-Words as features
        if (feature_value=="frequency"):
            print("Using raw frequency as features ...") 
-           vectorizer = CountVectorizer(max_features=max_num_features#stop_words='english', non_negative=True,
-                                         )
+           vectorizer = CountVectorizer(max_features=max_num_features)
        elif(feature_value=="TF-IDF"):
-           vectorizer = TfidfVectorizer(#stop_words='english', non_negative=True,
-                                             max_features=max_num_features)  # analyzer not accepted as paramter??? )
+           vectorizer = TfidfVectorizer(max_features=max_num_features)  # analyzer not accepted as paramter??? )
 
        elif (feature_value=="binary"):
             print("using binary features......>>>>>>")
@@ -257,21 +255,20 @@ def run_document_classification(data, labels, parameters, show_progress=True):
 
     elif feature_construction_method =="ngrams": # n-grams as features 
         if (feature_value=="frequency"):
+
              print("Using raw frequency as features ...") 
-             vectorizer = CountVectorizer(#stop_words='english', strip_accents ='ascii',#non_negative=True,
-                                               max_features =max_num_features, #norm='l2',
-                                               analyzer=feature_level,
-                                               ngram_range=(min_ngram,max_ngram))
+             vectorizer = CountVectorizer(max_features =max_num_features, 
+                                          analyzer=feature_level,
+                                          ngram_range=(min_ngram,max_ngram))
         elif(feature_value=="TF-IDF"):
-            vectorizer = TfidfVectorizer(#stop_words='english', strip_accents ='ascii',#non_negative=True,
-                                               max_features =max_num_features, #norm='l2',
-                                               analyzer=feature_level,
-                                               ngram_range=(min_ngram,max_ngram))
+            vectorizer = TfidfVectorizer(max_features =max_num_features, 
+                                         analyzer=feature_level,
+                                         ngram_range=(min_ngram,max_ngram))
         elif (feature_value=="binary"):
             print("using binary features......>>>>>>")
-            vectorizer = CountVectorizer( max_features =max_num_features, #norm='l2',
-                                               analyzer=feature_level,
-                                               ngram_range=(min_ngram,max_ngram), binary=True)
+            vectorizer = CountVectorizer(max_features =max_num_features,
+                                         analyzer=feature_level,
+                                         ngram_range=(min_ngram,max_ngram), binary=True)
 
     elif feature_construction_method =="lsa": # mungon ,vectorizer
          return lsa_classification(data,labels,number_of_components=10)
@@ -318,8 +315,8 @@ def run_document_classification(data, labels, parameters, show_progress=True):
         recall.append(recall_score(y_test, y_pred, average="macro"))
         #print(classification_report(y_test, y_pred))
 
-    file_name = "Saved_Shallow_Models\Model_"+feature_construction_method+"_" + str(feature_level) + "_" + str(min_ngram)+"_" + str(max_ngram)+".pkl"
-    joblib.dump(vec_clf, file_name)
+    #file_name = "Saved_Shallow_Models\Model_"+feature_construction_method+"_" + str(feature_level) + "_" + str(min_ngram)+"_" + str(max_ngram)+".pkl"
+    #joblib.dump(vec_clf, file_name)
 
  
     avg_accuracy = round(np.mean(accuracy)*100,2)

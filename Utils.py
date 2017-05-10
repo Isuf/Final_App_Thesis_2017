@@ -18,10 +18,43 @@ cachedStopWords = stopwords.words("english")
 #########################################################################################################
 
 
+def load_data_LDA(data_folder,clean_string=True,remove_numbers=False,split_for_cv=True):
+    docs = []
+    original_docs=[]
+    vocab = defaultdict(float)
+    num_zero_sentences=0
+    for i in range(len(data_folder)):
+        with open(data_folder[i], "r",encoding="utf-8",errors="ignore") as f:
+             for line in f:
+                 doc = []
+                 doc.append(line.strip())
+                 original_docs.append(line.strip())
+
+                 if clean_string:
+                    text = cleanstring(" ".join(doc))
+                 else: 
+                    text = " ".join(doc).lower() #remove all whitespace + lowercase
+  
+                 if remove_numbers:
+                     text = ' '.join([ '' if word.isdigit() else word  for word in text.split()])
+                 else:
+                     text = ' '.join([  word  for word in text.split()[0:250]])  # TE FSHIHET LDA NUK  ESHTE BA RUN ME KTA
+
+                 if(len(text.split())>-1):
+                     words = set(text.split())
+                     for word in words:
+                        vocab[word] += 1
+                     if split_for_cv:
+                         datum ={ "y": i,  "text" : text,   "num_words": len(text.split()),   "split": np.random.randint(0,10) , "num_chars": len(text)}
+                     else : 
+                         datum ={ "y": i,  "text" : text,   "num_words": len(text.split()) }
+                     docs.append(datum)
+                    
+    print("Number of empty sentences : " + str(num_zero_sentences))
+    return docs,vocab,original_docs
 
 
-
-def load(data_folder, clean_string=False, remove_stop_words=False, split_for_cv=False):
+def load(data_folder, clean_string=False, remove_stop_words=False, remove_numbers=False,split_for_cv=False):
     '''
         Load all the files from data_folder  in a format like 
         { "text" :___, "y": ___, "num_words":____, "split":____}
@@ -37,21 +70,21 @@ def load(data_folder, clean_string=False, remove_stop_words=False, split_for_cv=
                  doc = []
                  doc.append(line.strip())
                  original_docs.append(line.strip())
-                 text = " ".join(doc)#.lower() #remove all whitespace + lowercase
+
                  if clean_string:
                     text = clean_str(" ".join(doc))
+                 else: 
+                    text = " ".join(doc).lower() #remove all whitespace + lowercase
 
+                #Due to GPU momory limitation the text is truncated to 250 words 
                  if remove_stop_words: 
-                    text = ' '.join([ '' if word.isdigit() else word  for word in text.split()[0:250] if word not in cachedStopWords])  
+                    text = ' '.join([ word  for word in text.split()[0:250] if word not in cachedStopWords])  
                  else:
-                    text = ' '.join([ '' if word.isdigit() else  word  for word in text.split()[0:250]])#if len(word) >1])
+                    text = ' '.join([ word  for word in text.split()[0:250]])  
 
-                 #if remove_stop_words: 
-                 #   text = ' '.join([ '' if word.isdigit() else word  for word in text.split() if word not in cachedStopWords])  
-                 #else:
-                 #   text = ' '.join([ '' if word.isdigit() else  word  for word in text.split()])#if len(word) >1])
+                 if remove_numbers:
+                     text = ' '.join([ '' if word.isdigit() else word  for word in text.split()])
 
-                 #print("\n" + remove_all_whitespaces(text))
                  if(len(text.split())>-1):
                      words = set(text.split())
                      for word in words:
@@ -68,6 +101,9 @@ def load(data_folder, clean_string=False, remove_stop_words=False, split_for_cv=
 def remove_all_whitespaces(text):
     return  " ".join(text.split())
 
+def cleanstring(string):
+    string=''.join([i if ord(i) < 128 else ' ' for i in string])
+    return string.strip().lower()
 def clean_str(string):
     """
     Tokenization/string cleaning for all datasets 
@@ -75,6 +111,9 @@ def clean_str(string):
      Source : https://github.com/yoonkim/CNN_sentence/blob/master/process_data.py 
 
     """
+
+    
+
     string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)    
     #print(string)
 
